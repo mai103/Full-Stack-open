@@ -13,3 +13,4 @@ sequenceDiagram
     activate server
     server-->>browser: HTML Page is updated
     deactivate server
+```
