@@ -25,5 +25,5 @@ sequenceDiagram
     server-->>browser: JSON notes data
     deactivate server
 
-    Note right of browser: JS renders notes without reloading the page
+    Note right of browser: JavaScript renders notes on the page
 ```
