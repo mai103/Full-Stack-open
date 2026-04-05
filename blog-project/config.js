@@ -1,6 +1,6 @@
-const PORT = 3001
-const MONGODB_URI =`mongodb+srv://maiahmed_db_user:mai1234@cluster0.ktddd1y.mongodb.net/phonebook?appName=Cluster0`;
 
+const PORT = process.env.PORT
+const MONGODB_URI = process.env.MONGODB_URI
 
 module.exports = {
   MONGODB_URI,
