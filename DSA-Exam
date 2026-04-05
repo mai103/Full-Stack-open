@@ -1,0 +1,35 @@
+/**
+ * @param {string[]} names
+ * @param {number[]} heights
+ * @return {string[]}
+ */
+var sortPeople = function(names, heights) {
+    if(names.length < 2) return (names, heights);
+    
+    function FindTheTallest(height){
+        let tallest = height[0];
+        let tallestIndex = 0;
+
+        for(var i=0; i<height.length; i++){
+            if(tallest < height[i]){
+                tallest = height[i];
+                tallestIndex =i;
+            }
+        }
+        return tallestIndex
+    }
+    
+    let namesOutput = [];
+
+    const n =names.length
+    for (var i = 0; i < n ; i++) {
+        let index =FindTheTallest(heights);
+
+        namesOutput.push(names[index]);
+
+        names.splice(index, 1);
+        heights.splice(index, 1);
+    }
+
+    return namesOutput;
+};
