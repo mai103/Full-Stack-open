@@ -4,10 +4,9 @@ import User from '../models/users.js'
 
 const blogsRouter =Router()
 // get blogs
-blogsRouter.get('/', (req, res) => {
-  Blog.find({}).then(blogs => {
-    res.json(blogs)
-  })
+blogsRouter.get('/', async(req, res) => {
+  const blogs = await Blog.find({}).populate('user', {username: 1, name: 1})
+  res.json(blogs)
 })
 
 // add new bolg
