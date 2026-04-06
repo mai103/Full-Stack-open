@@ -1,5 +1,5 @@
 import express from "express";
-import Person from './models/person.js';
+import Person from './models/mongo.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,7 +14,7 @@ app.get("/api/persons", (req, res) => {
 })
 
 //info page
-app.get("/info", (req, res) =>{
+app.get("/info", (req, res, next) =>{
     Person.countDocuments({})
     .then(count => {
       res.send(`
@@ -36,14 +36,14 @@ app.get("/api/persons/:id", (req, res) =>{
 })
 
 //delete person 
-app.delete("/api/persons/:id", (req, res)=>{
+app.delete("/api/persons/:id", (req, res, next)=>{
     Person.findByIdAndDelete(req.params.id)
     .then(() => res.status(204).end())
     .catch(error => next(error));
 })
 
 //add new person
-app.post("/api/persons", (req,res) =>{
+app.post("/api/persons", (req,res, next) =>{
     const { name, number } = req.body;
 
   const person = new Person({ name, number });
@@ -68,10 +68,6 @@ app.put('/api/persons/:id', (req, res, next) => {
     .catch(error => next(error));
 });
 
-const unknownEndpoint = (req, res) => {
-  res.status(404).send({ error: 'unknown endpoint' });
-};
-app.use(unknownEndpoint);
 
 const errorHandler = (error, req, res, next) => {
   console.error(error.message);
@@ -79,7 +75,6 @@ const errorHandler = (error, req, res, next) => {
   if (error.name === 'CastError') {
     return res.status(400).send({ error: 'malformatted id' });
   } else if (error.name === 'ValidationError') {
-    // 3.19 + 3.20: إرجاع رسالة الخطأ الخاصة بـ Mongoose
     return res.status(400).json({ error: error.message });
   }
 
