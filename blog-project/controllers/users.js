@@ -1,5 +1,5 @@
 import { Router } from "express";
-import bcrybt from "bcrypt";
+import bcrypt from "bcrypt";
 import User from "../models/users.js";
 
 const userRouter =Router();
@@ -27,7 +27,7 @@ userRouter.post("/", async (req, res)=>{
         return res.status(400).json({error: "username must be unique!"})
     }
 
-    const passwordHash = await bcrybt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const user = new User({
         username, name, passwordHash

@@ -1,6 +1,16 @@
 import {Router} from 'express'
 import Blog from '../models/blog.js'
 import User from '../models/users.js'
+import jwt from 'jsonwebtoken'
+
+const getToken =req =>{
+  const authorization = req.headers.authorization;
+
+  if(authorization && authorization.startsWith("Bearer")){
+    return authorization.replace("Bearer ", "");
+  }
+  return null;
+}
 
 const blogsRouter =Router()
 // get blogs
@@ -30,19 +40,29 @@ blogsRouter.get('/', async(req, res) => {
   const pageNum =Math.max(1,parseInt(page));
   const limitNum =Math.max(1,parseInt(limit));
   const skip = (pageNum-1) * limitNum;
+  const totalBlogs = await Blog.countDocuments(query);
 
   const blogs = await Blog.find(query).sort(sortCriteria).skip(skip).limit(limitNum).populate('user', {username: 1, name: 1})
   res.json({
     metadata:{
       currentPage: pageNum,
       pageSize:blogs.length,
+      totalBlogs,
+      totalPages: Math.ceil(totalBlogs / limitNum)
     },blogs})
 })
 
 // add new bolg
 blogsRouter.post('/', async(req, res) => {
   const body = req.body
-  const user = await User.findOne({});
+
+  const decodedToken = jwt.verify(getToken(req),process.env.SECRET)
+
+  if(!decodedToken.id){
+    return res.status(401).json({error: "Token invalid!"})
+  }
+
+  const user = await User.findById(decodedToken.id);
 
   if (!user) {
     return response.status(400).json({ 
@@ -52,7 +72,7 @@ blogsRouter.post('/', async(req, res) => {
 
   const blog = new Blog({
     title: body.title,
-    auther: body.auther,
+    author: body.author,
     url: body.url,
     likes: body.likes,
     user: user.id

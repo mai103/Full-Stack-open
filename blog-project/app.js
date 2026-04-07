@@ -2,6 +2,8 @@ import express from 'express'
 import blogsRouter from'./controllers/blogs.js'
 import mongoose from'mongoose'
 import userRouter from './controllers/users.js'
+import loginRouter from './controllers/login.js';
+import errorHandler from './utils/middleware.js';
 
 import dns from "node:dns/promises";
 //to avoid connection failure
@@ -25,7 +27,9 @@ app.use(express.json())
 
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', userRouter)
+app.use('/api/login', loginRouter)
 
+app.use(errorHandler)
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
