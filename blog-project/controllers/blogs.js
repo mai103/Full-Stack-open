@@ -3,15 +3,6 @@ import Blog from '../models/blog.js'
 import User from '../models/users.js'
 import jwt from 'jsonwebtoken'
 
-const getToken =req =>{
-  const authorization = req.headers.authorization;
-
-  if(authorization && authorization.startsWith("Bearer")){
-    return authorization.replace("Bearer ", "");
-  }
-  return null;
-}
-
 const blogsRouter =Router()
 // get blogs
 blogsRouter.get('/', async(req, res) => {
@@ -55,19 +46,10 @@ blogsRouter.get('/', async(req, res) => {
 // add new bolg
 blogsRouter.post('/', async(req, res) => {
   const body = req.body
+  const user = req.user;
 
-  const decodedToken = jwt.verify(getToken(req),process.env.SECRET)
-
-  if(!decodedToken.id){
-    return res.status(401).json({error: "Token invalid!"})
-  }
-
-  const user = await User.findById(decodedToken.id);
-
-  if (!user) {
-    return response.status(400).json({ 
-      error: 'no users found in database. Create a user first!' 
-    })
+ if(!user){
+    return res.status(400).json({error:"invalid user or token"})
   }
 
   const blog = new Blog({
@@ -78,6 +60,8 @@ blogsRouter.post('/', async(req, res) => {
     user: user.id
   })
   const savedBlog = await blog.save()
+  user.blogs = user.blogs.concat(savedBlog._id)
+  await user.save()
   res.status(201).json(savedBlog)
 })
 
@@ -93,4 +77,23 @@ blogsRouter.patch("/:id/like", async(req, res)=>{
   res.status(200).json(updatedBlog)
 })
 
+//delete blog by id
+blogsRouter.delete("/:id", async(req, res)=>{
+  const user = req.user;
+
+  if(!user){
+    return res.status(400).json({error:"invalid user or token"})
+  }
+  const blog =await Blog.findById(req.params.id);
+
+  if(!blog){
+    return res.status(404).json({error: "blog not found"})
+  }
+  
+  if(blog.user.toString() !== user.id.toString()){
+    return res.status(401).json({error:"only the author can delete this blog"})
+  }
+  await Blog.findByIdAndDelete(req.params.id);
+  res.status(204).end();
+})
 export default blogsRouter

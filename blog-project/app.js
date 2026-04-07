@@ -3,7 +3,7 @@ import blogsRouter from'./controllers/blogs.js'
 import mongoose from'mongoose'
 import userRouter from './controllers/users.js'
 import loginRouter from './controllers/login.js';
-import errorHandler from './utils/middleware.js';
+import {errorHandler, tokenExtractor, userExtractor } from './utils/middleware.js';
 
 import dns from "node:dns/promises";
 //to avoid connection failure
@@ -24,8 +24,9 @@ mongoose.connect(mongouri)
   })
 
 app.use(express.json())
+app.use(tokenExtractor)
 
-app.use('/api/blogs', blogsRouter)
+app.use('/api/blogs', userExtractor, blogsRouter)
 app.use('/api/users', userRouter)
 app.use('/api/login', loginRouter)
 
