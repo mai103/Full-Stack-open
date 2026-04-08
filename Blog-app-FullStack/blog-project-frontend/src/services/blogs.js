@@ -22,7 +22,7 @@ const createBlog = async newObject => {
   return response.data
 }
 const update = async (id, newObject) => {
-  const response = await axios.patch(`${baseUrl}/${id}/likes`, newObject)
+  const response = await axios.patch(`${baseUrl}/${id}/like`, newObject)
   return response.data
 }
 export default {getBlogs, createBlog, setToken, update};

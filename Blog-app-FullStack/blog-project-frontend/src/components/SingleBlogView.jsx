@@ -1,12 +1,12 @@
 import { useParams } from 'react-router-dom'
 
-const SingleBlogView = ({ blogs, handleLike }) => {
+const SingleBlogView = ({ blogs, handleLike, user }) => {
   const id = useParams().id
   
   if (!blogs || !Array.isArray(blogs) || blogs.length === 0) {
     return <p>Loading blogs...</p>
   }
-  
+
   const blog = blogs.find(b => b.id === id)
 
   if (!blog) {
@@ -20,7 +20,7 @@ const SingleBlogView = ({ blogs, handleLike }) => {
         <a href={blog.url} target="_blank" rel="noreferrer">{blog.url}</a>
         <div style={{ marginTop: '10px' }}>
           {blog.likes} likes
-          <button onClick={() => handleLike(blog)}>like</button>
+          {user && <button onClick={() => handleLike(blog)}>like</button>}
         </div>
         <p>added by <strong>{blog.author}</strong></p>
       </div>

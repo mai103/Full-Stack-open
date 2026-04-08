@@ -31,13 +31,9 @@ function App() {
     const fetchBlogs = async ()=>{
       try {
         const initialBlogs = await blogService.getBlogs();
-        console.log('Fetched blogs:', initialBlogs)
         
-        if (initialBlogs && initialBlogs.blogs) {
-       setBlogs(initialBlogs.blogs) 
-    } else {
-       setBlogs(initialBlogs)
-    }
+        const data = Array.isArray(initialBlogs) ? initialBlogs : initialBlogs.blogs
+        setBlogs(data)
     } catch(error){
       console.error('Faild to get blogs:', error);
     }}
@@ -90,14 +86,29 @@ async function handleLike(blog) {
   const idToUpdate = blog.id
 
   const changedBlog = {
+    ...blog,
     likes: blog.likes + 1,
+    user: blog.user?.id || blog.user
   }
 
   try {
     const returnedBlog = await blogService.update(idToUpdate, changedBlog)
-    setBlogs(blogs.map(b => b.id !== blog.id ? b : returnedBlog))
+    
+    setBlogs(prevBlogs =>{
+      if (Array.isArray(prevBlogs)) {
+          return prevBlogs.map(b => b.id !== blog.id ? b : returnedBlog)
+      }
+      return {
+        ...prevBlogs,
+        blogs: prevBlogs.blogs.map(b => b.id !== blog.id ? b : returnedBlog)
+      }
+      })
   } catch (error) {
     console.error('Error updating likes:', error)
+
+    setNotification('Failed to update likes')
+    setNotificationType('error')
+    setTimeout(() => setNotification(null), 5000)
   }
 }
 const padding = { padding: 5 }
@@ -136,7 +147,7 @@ const padding = { padding: 5 }
             user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
           } />
 
-          <Route path="/blogs/:id" element={<SingleBlogView blogs={blogs} handleLike={handleLike} />} />
+          <Route path="/blogs/:id" element={<SingleBlogView blogs={blogs} handleLike={handleLike} user={user} />} />
         </Routes>
       </div>
     </Router>
